@@ -14,10 +14,12 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::prefix('v1')->group(function () {
+Route::prefix('api/v1')->group(function () {
     Route::name('short.link')->group(function () {
         Route::get('short/link/list', [ShortLinkController::class, 'index'])->name('list');
         Route::post('short/link/create', [ShortLinkController::class, 'store'])->name('store');
         Route::get('get/{code}/shorten/link', [ShortLinkController::class, 'shortenLink'])->name('shorten');
     });
 });
+
+Route::get('/redirect/{code}', [ShortLinkController::class, 'redirect']);

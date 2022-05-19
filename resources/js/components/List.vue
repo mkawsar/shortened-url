@@ -7,7 +7,18 @@
                         <div class="card-header">Shortened URL Form</div>
 
                         <div class="card-body">
-                            I'm an example component.
+                            <form ref="shortened">
+                                <div class="mb-3">
+                                    <label for="link" class="form-label">Link</label>
+                                    <input type="text" class="form-control" id="link" placeholder="Link for Shortened"
+                                           name="link" v-model="shortened.link" v-validate="shortenedValidations.link">
+                                    <span class="text-danger"
+                                          v-show="errors.has('link')">{{ errors.first('link') }}</span>
+                                </div>
+                                <button type="button" class="btn btn-success"
+                                        @click.prevent="handleSubmitShortenedForm">Submit
+                                </button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -30,7 +41,7 @@
                                     <template slot="links" slot-scope="props">
                                         <div class="custom-actions">
                                             <a href="javascript:void(0)" @click="handleRedirect(props.rowData.code)">
-                                                {{baseUrl + '/' + props.rowData.code}}
+                                                {{ baseUrl + '/redirect/' + props.rowData.code }}
                                             </a>
                                         </div>
                                     </template>
@@ -54,10 +65,32 @@
 </template>
 
 <script>
+import Vue from 'vue'
 import axios from 'axios';
 import Vuetable from "vuetable-2";
+import VeeValidate from 'vee-validate'
 import VuetablePagination from "vuetable-2/src/components/VuetablePagination";
 import VuetablePaginationInfo from "vuetable-2/src/components/VuetablePaginationInfo";
+
+let veeCustomMessage = {
+    en: {
+        custom: {
+            link: {
+                required: 'URL link field is required',
+            }
+        }
+    }
+};
+let shortenedObj = {
+    link: '',
+};
+Vue.use(VeeValidate, {
+    dictionary: veeCustomMessage,
+    fieldsBagName: shortenedObj
+});
+Vue.use(VeeValidate, {
+    dictionary: veeCustomMessage
+});
 
 export default {
     mounted() {
@@ -108,7 +141,14 @@ export default {
                     dataClass: 'center aligned',
                 }
             ],
-            url: '/api/v1/short/link/list'
+            url: '/api/v1/short/link/list',
+            shortened: shortenedObj,
+            shortenedValidations: {
+                link: {
+                    required: true,
+                    url: true
+                }
+            }
         }
     },
     methods: {
@@ -125,14 +165,42 @@ export default {
         hideLoader() {
             this.loading = false;
         },
+        getError(fieldName) {
+            return this.errors.first(fieldName);
+        },
         handleRedirect(code) {
             axios.get(`/api/v1/get/${code}/shorten/link`)
                 .then(res => {
                     window.open(res.data.data.link);
                 })
                 .catch(err => {
-                    console.log(err)
+                    this.$toast.error(err.response.data.data);
                 });
+        },
+        handleSubmitShortenedForm() {
+            this.$validator.validateAll().then(isValid => {
+                if (isValid) {
+                    let formData = new FormData();
+                    formData.append('link', this.shortened.link);
+
+                    axios.post('/api/v1/short/link/create', formData)
+                        .then(res => {
+                            this.$toast.success(res.data.data);
+                            this.$refs.vuetable.refresh();
+                            this.$validator.reset();
+                            this.shortened.link = '';
+                        })
+                        .catch(err => {
+                            if (err.response.status === 422) {
+                                this.$toast.error(err.response.data.data);
+                            } else if (err.response.status === 412) {
+                                this.$toast.error(err.response.data.data);
+                            } else {
+                                this.$toast.error('Something went wrong');
+                            }
+                        })
+                }
+            });
         }
     }
 }
