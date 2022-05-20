@@ -63,6 +63,19 @@ return [
             ]) : [],
         ],
 
+        // For unit testing
+        'testing' => [
+            'driver' => 'mysql',
+            'host' => env('TEST_DB_HOST', 'localhost'),
+            'database' => env('TEST_DB_DATABASE', 'forge'),
+            'username' => env('TEST_DB_USERNAME', 'forge'),
+            'password' => env('TEST_DB_PASSWORD', ''),
+            'charset' => 'utf8',
+            'collation' => 'utf8_unicode_ci',
+            'prefix' => '',
+            'strict' => false,
+        ],
+
         'pgsql' => [
             'driver' => 'pgsql',
             'url' => env('DATABASE_URL'),

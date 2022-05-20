@@ -15,8 +15,10 @@
                                     <span class="text-danger"
                                           v-show="errors.has('link')">{{ errors.first('link') }}</span>
                                 </div>
-                                <button type="button" class="btn btn-success"
+                                <button type="button" class="btn btn-success" :disabled="btnLoader" v-if="!btnLoader"
                                         @click.prevent="handleSubmitShortenedForm">Submit
+                                </button>
+                                <button type="button" class="btn btn-success" :disabled="btnLoader" v-else>Loading....
                                 </button>
                             </form>
                         </div>
@@ -148,7 +150,8 @@ export default {
                     required: true,
                     url: true
                 }
-            }
+            },
+            btnLoader: false
         }
     },
     methods: {
@@ -178,6 +181,7 @@ export default {
                 });
         },
         handleSubmitShortenedForm() {
+            this.btnLoader = !this.btnLoader;
             this.$validator.validateAll().then(isValid => {
                 if (isValid) {
                     let formData = new FormData();
@@ -189,6 +193,7 @@ export default {
                             this.$refs.vuetable.refresh();
                             this.$validator.reset();
                             this.shortened.link = '';
+                            this.btnLoader = !this.btnLoader;
                         })
                         .catch(err => {
                             if (err.response.status === 422) {

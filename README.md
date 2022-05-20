@@ -38,6 +38,18 @@
     ```bash
       ngrok http 8000
     ```
+```shell
+Note: If you run your application on another port then you have to assign that port here
+```
+
+### Unit Testing
+Generated PHPUnit testing. If you want to run the unit testing please following the steps.
+* Need to be copy `.env.testing.example`  to `.env.testing`
+* Create a database for testing and configure your testing environment in `.env.testing` file
+* Run the following command for initiate PHPUnit testing
+    ```shell
+      ./vendor/bin/phpunit
+    ```
 
 ### Support
 
