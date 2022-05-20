@@ -203,6 +203,7 @@ export default {
                             } else {
                                 this.$toast.error('Something went wrong');
                             }
+                            this.btnLoader = !this.btnLoader;
                         })
                 }
             });
